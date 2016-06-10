@@ -9,6 +9,11 @@
   <!-- Bootstrap CSS -->
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.2/css/bootstrap.min.css" integrity="sha384-y3tfxAZXuh4HwSYylfB+J125MxIs6mR5FOHamPBG064zB+AFeWH94NdvaCBm8qnd" crossorigin="anonymous">
   <style>
+    body {
+      /* Needed for scrollspy */
+      position: relative;
+      /* Needed for scrollspy */
+    }
     #top-navbar-container {
       padding: 0;
     }
@@ -19,6 +24,10 @@
       top: 0;
       left: 100%;
       margin-top: -1px;
+    }
+    .horizontal-spacing {
+      margin-top: 200px;
+      margin-bottom: 200px;
     }
     #shopMain .panel {
       border: 1px solid #fff;
@@ -88,21 +97,22 @@
     });
   </script>
 </head>
-<body>
+<body data-spy="scroll" data-target="#top-navbar-container">
+
   <div id="top-navbar-container" class="container-fluid">
 
     <nav class="navbar navbar-fixed-top navbar-light" style="background-color: #e3f2fd;">
       
       <a class="navbar-brand" href="#">Navbar</a>
-      <ul class="nav navbar-nav">
-        <li class="nav-item active">
-          <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
+      <ul class="nav navbar-nav" role="tablist">
+        <li class="nav-item">
+          <a class="nav-link" href="#shopMain">Home <span class="sr-only">(current)</span></a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="#">Featured</a>
+          <a class="nav-link" href="#featured">Featured</a>
         </li>
         <li class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">
+          <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#categories" role="button" aria-haspopup="true" aria-expanded="false">
             Categories
           </a>
           <div class="dropdown-menu" aria-labelledby="Preview">
@@ -224,8 +234,10 @@
 
   </div> <!-- container -->
 
-  <div class="container productsContainer">
+  <div id="featured" class="container productsContainer">
     
+    <h2 class="display-5">Featured Products</h2>
+
     <!-- deck -->
     <div class="card-deck-wrapper">
       <div class="card-deck">
@@ -267,6 +279,10 @@
     <!-- deck [END] -->
 
   </div> <!-- container -->
+
+  <div class="container">
+    <div class="row horizontal-spacing"></div>
+  </div>
 
   <!-- footer -->
   <div class="container-fluid footer">
