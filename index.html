@@ -1,0 +1,457 @@
+<!-- DOCTYPE -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Bootstrap Example Template</title>
+  <meta charset="utf-8">
+  <!-- Viewport Meta Tag -->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.2/css/bootstrap.min.css" integrity="sha384-y3tfxAZXuh4HwSYylfB+J125MxIs6mR5FOHamPBG064zB+AFeWH94NdvaCBm8qnd" crossorigin="anonymous">
+  <style>
+    body {
+      position: relative; /* Needed for scrollspy */
+    }
+    #top-navbar-container {
+      padding: 0;
+    }
+    .dropdown-submenu {
+      position: relative;
+    }
+    .dropdown-submenu .dropdown-menu {
+      top: 0;
+      left: 100%;
+      margin-top: -1px;
+    }
+    .horizontal-spacing {
+      margin-top: 200px;
+      margin-bottom: 200px;
+    }
+    .section {
+      padding-top: 65px; /* for the top fixed navbar */
+    }
+    #shopMain .panel {
+      border: 1px solid #fff;
+      margin-top: 60px;
+    }
+    .generalPanel {
+      background: #f5f5f5;
+    }
+    .mainCarouselContainer {
+      padding: 0;
+       
+    }
+    .centerText {
+      text-align: center;
+    }
+    .shopTitlePanel {
+      /* background: #f9f9f9; */
+      padding-top: 20px;
+	    padding-bottom: 20px;
+    }
+    .categoryPanel {
+      padding-top: 20px;
+      padding-bottom: 20px;
+    }
+    .productTitlePanel {
+      padding-top: 20px;
+      padding-bottom: 20px;
+    }
+    .productThumbnailWrapper {
+      width: 100%;
+      height: 200px;
+    }
+    .productThumbnail {
+      width: 100%;
+      height: 100%;
+      background-repeat:no-repeat;
+      background-size:cover;
+    }
+    .productsContainer {
+      margin-top: 60px;
+      margin-bottom: 60px;
+    }
+    #productImage {
+      width: 100%;
+      padding: 50% 0;
+      background-repeat:no-repeat;
+      background-size:cover;
+    }
+    .footer {
+      color: #fff;
+      background: #bbb;
+      padding-top: 30px;
+      padding-bottom: 30px;
+    }
+    /*
+     * 
+     * Stacked navbar. A hack for Bootstrap 4 alpha. 991px is large size. 
+     *
+     * Reference: http://stackoverflow.com/questions/33486653/stacked-collapsible-navbar-in-bootstrap-4
+     * 
+     */
+    @media(max-width:991px) {
+      .navbar .navbar-nav>.nav-item {
+          float: none;
+          margin-left: .1rem;
+      }
+      .navbar .navbar-nav {
+          float:none !important;
+      }
+      .navbar .collapse.in, .navbar .collapsing  {
+          clear:both;
+      }
+    }
+  </style>
+  <!-- JavaScript: placed at the end of the document so the pages load faster -->
+  <!-- jQuery library -->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+
+  <script src="tether.min.js"></script>
+  
+
+  <!-- Latest compiled JavaScript -->
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.2/js/bootstrap.min.js" integrity="sha384-vZ2WRJMwsjRMW/8U7i6PWi6AlO1L79snBrmgiDpgIWJ82z8eA5lenwvxbMV1PAh7" crossorigin="anonymous"></script>
+  
+  <script>
+
+    function scrollTo(hash) {
+
+      // Using jQuery's animate() method to add smooth page scroll
+      // The optional number (800) specifies the number of milliseconds it takes to scroll to the specified area (the speed of the animation)
+      $('html, body').animate({
+        scrollTop: $(hash).offset().top
+      }, 800, function(){
+
+        // Add hash (#) to URL when done scrolling (default click behavior)
+        window.location.hash = hash;
+      
+      });
+
+    }
+
+    function enableSmoothScrolling() {
+
+      // Add smooth scrolling to all links inside a navbar
+      $("#top-navbar-container a").on('click', function(event){
+
+        // Make sure this.hash has a value before overriding default behavior
+        if (this.hash !== "") {
+
+          // Prevent default anchor click behavior
+          event.preventDefault();
+
+          // Store hash (#)
+          var hash = this.hash;
+
+          scrollTo(hash);
+
+        } // End if statement
+
+      });
+      
+    }
+
+    function showProduct(id) {
+      scrollTo('#product_details');
+      var pd = getProductData(id);
+      displayProductInProductDetails(pd);
+    }
+
+    function getProductData(id) {
+
+      var productData = {};
+
+      productData.id = id;
+      productData.title = 'Flowers_'+id;
+      productData.description = 'We love flowers! They are beautiful creation of God!';
+      productData.imageUrl = 'flowers.jpg';
+      
+      return productData;
+
+    }
+
+    function displayProductInProductDetails(productData) {
+      $('#product_details_title').text(productData.title);
+      $('#product_details_description').text(productData.description);
+      $('#productImage').css('background-image', 'url("'+productData.imageUrl+'")');
+    }
+
+    function bindProductLinkOnClick() {
+      $('.product-link').on('click', function(event){
+        showProduct($(this).data('product-id'));
+      });
+    }
+
+    $(document).ready(function(){
+
+      //For nested menu
+      $('.dropdown-submenu a.test').on("click", function(e){
+        $(this).next('div').toggle();
+        e.stopPropagation();
+        e.preventDefault();
+      });
+
+      enableSmoothScrolling();
+
+      bindProductLinkOnClick();
+
+    });
+
+  </script>
+</head>
+<body data-spy="scroll" data-target="#top-navbar-container">
+
+  <div id="top-navbar-container">
+    <nav class="navbar navbar-fixed-top navbar-light" style="background-color: #e3f2fd;">
+      <div class="container-fluid">
+        <button class="navbar-toggler hidden-lg-up pull-xs-right" type="button" data-toggle="collapse" data-target="#collapsingNavbar">
+        &#9776;
+        </button>
+        <a class="navbar-brand" href="#">SHOP</a>
+        <div id="collapsingNavbar" class="collapse navbar-toggleable-md">
+          <ul class="nav navbar-nav" role="tablist">
+            <li class="nav-item">
+              <a class="nav-link" href="#shopMain">Home <span class="sr-only">(current)</span></a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#featured">Featured</a>
+            </li>
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#categories" role="button" aria-haspopup="true" aria-expanded="false">
+                Categories
+              </a>
+              <div class="dropdown-menu" aria-labelledby="Preview">
+                <a class="dropdown-item" href="#">Flowers</a>
+                <a class="dropdown-item" href="#">Rose</a>
+                <a class="dropdown-item" href="#">Coffee</a>
+                <div class="dropdown-submenu">
+                  <a class="test dropdown-toggle dropdown-item" id="dropdownMenu2" href="#">New dropdown<!--<span class="caret"></span>--></a>
+                  <div class="dropdown-menu" aria-labelledby="dropdownMenu2">
+                    <a class="dropdown-item">2nd level dropdown</a>
+                    <a class="dropdown-item">2nd level dropdown</a>
+                    <div class="dropdown-submenu">
+                      <a class="test dropdown-toggle dropdown-item" id="dropdownMenu3" href="#">New dropdown<!--<span class="caret"></span>--></a>
+                      <div class="dropdown-menu" aria-labelledby="dropdownMenu3">
+                        <a class="dropdown-item">3rd level dropdown</a>
+                        <a class="dropdown-item">3rd level dropdown</a>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#catalog">Catalog</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#product_details">Product Details</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#about">About</a>
+            </li>
+          </ul>
+          <form class="form-inline pull-xs-right">
+            <input class="form-control" type="text" placeholder="Search">
+            <button class="btn btn-success-outline" type="submit">Search</button>
+          </form>
+        </div>
+      </div>  
+    </nav>
+
+  </div>
+  
+  <div id="shopMain" class="container">
+
+    <div class="row">
+
+      <div class="col-xs-12 shopTitlePanel centerText panel">
+        <h1 class="display-2">SHOP</h1>
+        <p>New and Great Products</p>
+      </div>
+
+    </div> <!-- row -->
+  
+  </div> <!-- container -->
+
+  <div id="mainCarousel" class="container mainCarouselContainer">
+
+    <div class="row">
+
+      <div class="col-xs-12">
+
+        <!-- Carousel container -->
+        <div id="my-pics" class="carousel slide" data-ride="carousel">
+
+        <!-- Indicators -->
+        <ol class="carousel-indicators">
+        <li data-target="#my-pics" data-slide-to="0" class="active"></li>
+        <li data-target="#my-pics" data-slide-to="1"></li>
+        <li data-target="#my-pics" data-slide-to="2"></li>
+        </ol>
+
+        <!-- Content -->
+        <div class="carousel-inner" role="listbox">
+
+        <!-- Slide 1 -->
+        <div class="carousel-item active">
+        <img src="skateboard.png" alt="Skateboarding">
+        <div class="carousel-caption">
+        <h3>Skateboarding is Fun</h3>
+        <p>Live for Jesus!</p>
+        </div>
+        </div>
+
+        <!-- Slide 2 -->
+        <div class="carousel-item">
+        <img src="city.png" alt="City">
+        <div class="carousel-caption">
+        <h3>City Life</h3>
+        <p>Life is Good because GOD is in Life!</p>
+        </div>
+        </div>
+
+        <!-- Slide 3 -->
+        <div class="carousel-item">
+        <img src="live_out_your_faith.png" alt="Live Out Your Faith">
+        <div class="carousel-caption">
+        <h3>Live Out Your Faith</h3>
+        <p>Have Faith in God!</p>
+        </div>
+        </div>
+
+        </div>
+
+        <!-- Previous/Next controls -->
+        <a class="left carousel-control" href="#my-pics" role="button" data-slide="prev">
+        <span class="icon-prev" aria-hidden="true"></span>
+        <span class="sr-only">Previous</span>
+        </a>
+        <a class="right carousel-control" href="#my-pics" role="button" data-slide="next">
+        <span class="icon-next" aria-hidden="true"></span>
+        <span class="sr-only">Next</span>
+        </a>
+
+        </div>
+
+        <!-- Center the image -->
+        <style scoped>
+        .carousel-item img{
+            margin: 0 auto;
+        }
+        </style>
+
+      </div> <!-- col -->
+    
+    </div> <!-- row -->
+
+  </div> <!-- container -->
+
+  <div id="featured" class="container section productsContainer">
+    
+    <h2 class="display-5">Featured Products</h2>
+
+    <!-- deck -->
+    <div class="card-deck-wrapper">
+      <div class="card-deck">
+        <div class="card">
+          <div class="productThumbnailWrapper">
+            <!-- <img class="card-img-top productThumbnail" src="flowers.jpg" alt="Flowers"> -->
+            <div class="card-img-top productThumbnail" style="background-image:url('flowers.jpg');"></div>
+          </div>
+          <div class="card-block">
+            <h4 class="card-title">Flowers</h4>
+            <p class="card-text">$19.99</p>
+            <button type="button" class="btn btn-primary center-block product-link" data-product-id="1">View</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="productThumbnailWrapper">
+            <!-- <img class="card-img-top productThumbnail" src="flowers.jpg" alt="Flowers"> -->
+            <div class="card-img-top productThumbnail" style="background-image:url('rose.jpg');"></div>
+          </div>
+          <div class="card-block">
+            <h4 class="card-title">Rose</h4>
+            <p class="card-text">$59.99</p>
+            <button type="button" class="btn btn-primary center-block product-link" data-product-id="2">View</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="productThumbnailWrapper">
+            <!-- <img class="card-img-top productThumbnail" src="flowers.jpg" alt="Flowers"> -->
+            <div class="card-img-top productThumbnail" style="background-image:url('coffee.jpg');"></div>
+          </div>
+          <div class="card-block">
+            <h4 class="card-title">Suit</h4>
+            <p class="card-text">$259.00</p>
+            <button type="button" class="btn btn-primary center-block product-link" data-product-id="3">View</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- deck [END] -->
+
+  </div> <!-- container -->
+
+  <div id="categories" class="container section">
+    
+    <h2 class="display-5">Categories</h2>
+
+    <div class="row horizontal-spacing"></div>
+    
+  </div>
+
+  <div id="catalog" class="container section">
+    
+    <h2 class="display-5">Catalog</h2>
+
+    <div class="row horizontal-spacing"></div>
+
+  </div>
+
+  <div id="product_details" class="container section">
+
+    <h2 class="display-5">Product Details</h2>
+
+    <div class="row">
+
+      <div class="col-xs-6">
+
+        <div id="productImage"></div>
+      
+      </div> <!-- left col-xs-6 -->
+
+      <div class="col-xs-6">
+
+        <h3 id="product_details_title" class="display-8"></h3>
+
+        <div id="product_details_description"></div>
+
+      </div> <!-- right col-xs-6 -->
+    
+    </div> <!-- row -->
+
+    <div class="row horizontal-spacing"></div>
+
+  </div>
+
+  <div id="about" class="container section">
+    
+    <h2 class="display-5">About</h2>
+
+    <div class="row horizontal-spacing"></div>
+
+  </div>
+
+  <div class="container">
+    <div class="row horizontal-spacing"></div>
+  </div>
+
+  <!-- footer -->
+  <div class="container-fluid footer">
+    <div class="container">
+      By Better World Company 2016
+    </div>
+  </div>
+</body>
+</html>
