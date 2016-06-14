@@ -12,8 +12,12 @@
     body {
       position: relative; /* Needed for scrollspy */
     }
-    #top-navbar-container {
+    #top_navbar_container {
       padding: 0;
+    }
+    .ic-menu-img {
+      width:20px;
+      height:20px;
     }
     .dropdown-submenu {
       position: relative;
@@ -40,6 +44,9 @@
     .mainCarouselContainer {
       padding: 0;
        
+    }
+    .carousel-item img {
+        margin: 0 auto;
     }
     .centerText {
       text-align: center;
@@ -102,6 +109,11 @@
           clear:both;
       }
     }
+    .row {
+      /* Hack fix for mobile horizontal scroll bar */
+      margin-left: 0;
+      margin-right: 0;
+    }
   </style>
   <!-- JavaScript: placed at the end of the document so the pages load faster -->
   <!-- jQuery library -->
@@ -133,7 +145,7 @@
     function enableSmoothScrolling() {
 
       // Add smooth scrolling to all links inside a navbar
-      $("#top-navbar-container a").on('click', function(event){
+      $("#top_navbar_container a").on('click', function(event){
 
         // Make sure this.hash has a value before overriding default behavior
         if (this.hash !== "") {
@@ -200,13 +212,13 @@
 
   </script>
 </head>
-<body data-spy="scroll" data-target="#top-navbar-container">
+<body data-spy="scroll" data-target="#top_navbar_container">
 
-  <div id="top-navbar-container">
+  <div id="top_navbar_container">
     <nav class="navbar navbar-fixed-top navbar-light" style="background-color: #e3f2fd;">
       <div class="container-fluid">
         <button class="navbar-toggler hidden-lg-up pull-xs-right" type="button" data-toggle="collapse" data-target="#collapsingNavbar">
-        &#9776;
+        	<img class="ic-menu-img" src="ic_menu_black_24dp.png" alt="menu icon" />
         </button>
         <a class="navbar-brand" href="#">SHOP</a>
         <div id="collapsingNavbar" class="collapse navbar-toggleable-md">
@@ -333,13 +345,6 @@
         </a>
 
         </div>
-
-        <!-- Center the image -->
-        <style scoped>
-        .carousel-item img{
-            margin: 0 auto;
-        }
-        </style>
 
       </div> <!-- col -->
     
