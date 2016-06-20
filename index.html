@@ -176,7 +176,6 @@
 
       var cd = getCategoryByName(categoryName);
       displayCategory(cd);
-      bindCatalogProductLinks();
     }
 
     function displayCategory(categoryData) {
@@ -207,32 +206,40 @@
     function displayCatalogProducts(products) {
 
       //remove all loaded items
-      $('#catalog .card-deck').html('');
+      $('#catalog .card-deck').fadeOut(function(){
 
-      var cardTemplate = $($('#card_template').children()[0]);
-      var newRowTemplate = $(createRowDOMElement());
-      var thisCard;
+        $('#catalog .card-deck').html('');
 
-      for (var i=0; i<products.length; i++) {
+        var cardTemplate = $($('#card_template').children()[0]);
+        var newRowTemplate = $(createRowDOMElement());
+        var thisCard;
 
-        thisCard = cardTemplate.clone();
+        for (var i=0; i<products.length; i++) {
 
-        $(thisCard).find('.card-title').html(products[i].title);
-        $(thisCard).find('.card-text').html("$"+products[i].price);
-        $(thisCard).find('.productThumbnail').css('background-image', 'url("'+products[i].imageUrl+'")');
-        $(thisCard).find('.product-link').data('product-id', products[i].id);
+          thisCard = cardTemplate.clone();
 
-        if (i % 3 === 0) {
-          //new row
-          $('#catalog .card-deck').append(newRowTemplate.clone());
+          $(thisCard).find('.card-title').html(products[i].title);
+          $(thisCard).find('.card-text').html("$"+products[i].price);
+          $(thisCard).find('.productThumbnail').css('background-image', 'url("'+products[i].imageUrl+'")');
+          $(thisCard).find('.product-link').data('product-id', products[i].id);
+
+          if (i % 3 === 0) {
+            //new row
+            $('#catalog .card-deck').append(newRowTemplate.clone());
+          }
+
+          //append card to the last row
+          $($('#catalog .card-deck .row')
+            [$('#catalog .card-deck .row').length-1])
+              .append(thisCard);
+
         }
 
-        //append card to the last row
-        $($('#catalog .card-deck .row')
-          [$('#catalog .card-deck .row').length-1])
-            .append(thisCard);
+        bindCatalogProductLinks();
 
-      }
+        $('#catalog .card-deck').fadeIn();
+
+      });
 
     }
 
@@ -274,6 +281,7 @@
     function displayProductInProductDetails(productData) {
       $('#product_details_title').text(productData.title);
       $('#product_details_description').text(productData.description);
+      $('#product_details_price').text('$' + productData.price);
       $('#productImage').css('background-image', 'url("'+productData.imageUrl+'")');
     }
 
@@ -285,9 +293,12 @@
 
     function bindNavbarCategoriesOnClick() {
       $('.category-item').on('click', function(event){
-        $(this).css('cursor', 'pointer');
         showCategory($(this).data('category-name'));
       });
+    }
+
+    function bindNavbarCategoriesCSS() {
+      $('.category-item').css('cursor', 'pointer');
     }
 
     function getProductsData(fileName) {
@@ -361,6 +372,7 @@
       enableSmoothScrolling();
 
       bindProductLinksOnClick();
+      bindNavbarCategoriesCSS();
       bindNavbarCategoriesOnClick();
 
     });
@@ -389,7 +401,7 @@
                 Categories
               </a>
               <div class="dropdown-menu" aria-labelledby="Preview">
-                <a class="dropdown-item category-item" data-category-name="architecture" href="#">Architecture</a>
+                <a class="dropdown-item category-item" data-category-name="architecture">Architecture</a>
                 <div class="dropdown-submenu">
                   <a class="dropdown-main-item dropdown-toggle dropdown-item" id="dropdownMenu2" href="#">Nature</a>
                   <div class="dropdown-menu" aria-labelledby="dropdownMenu2">
@@ -612,7 +624,7 @@
 
   <div id="product_details" class="container section displayNone">
 
-    <h2 class="display-5">Product Details</h2>
+    <h2 class="display-5">Product</h2>
 
     <div class="row">
 
@@ -627,6 +639,8 @@
         <h3 id="product_details_title" class="display-8"></h3>
 
         <div id="product_details_description"></div>
+
+        <div id="product_details_price"></div>
 
       </div> <!-- right col-xs-6 -->
     
