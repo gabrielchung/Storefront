@@ -1,0 +1,8 @@
+[
+     {"categoryName":"architecture", "ids": [0, 1, 2, 3, 4]}
+    ,{"categoryName":"forest", "ids": [5, 6, 7]}
+    ,{"categoryName":"landscape", "ids": [8, 9, 10, 11]}
+    ,{"categoryName":"night", "ids": [12, 13, 14]}
+    ,{"categoryName":"portrait", "ids": [15, 16, 17]}
+    ,{"categoryName":"sport", "ids": [18, 19, 20]}
+]
