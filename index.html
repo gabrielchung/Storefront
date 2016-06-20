@@ -175,11 +175,11 @@
       scrollTo('#catalog');
 
       var cd = getCategoryByName(categoryName);
-      displayCategoryInCatalog(cd);
-
+      displayCategory(cd);
+      bindCatalogProductLinks();
     }
 
-    function displayCategoryInCatalog(categoryData) {
+    function displayCategory(categoryData) {
 
       //get ids
       var productIDs = categoryData.ids;
@@ -220,6 +220,7 @@
         $(thisCard).find('.card-title').html(products[i].title);
         $(thisCard).find('.card-text').html("$"+products[i].price);
         $(thisCard).find('.productThumbnail').css('background-image', 'url("'+products[i].imageUrl+'")');
+        $(thisCard).find('.product-link').data('product-id', products[i].id);
 
         if (i % 3 === 0) {
           //new row
@@ -241,6 +242,12 @@
       return result;
     }
 
+    function bindCatalogProductLinks() {
+      $('#catalog .product-link').on('click', function(event){
+        showProduct($(this).data('product-id'));
+      });
+    }
+
     function showProduct(id) {
       
       $('#product_details').show();
@@ -249,20 +256,18 @@
       scrollTo('#product_details');
 
       var pd = getProductData(id);
-      displayProductInProductDetails(pd);
+      
+      if (null !== pd) {
+        displayProductInProductDetails(pd);
+      } else {
+        console.log('Product cannot be found');
+      }
 
     }
 
     function getProductData(id) {
 
-      var productData = {};
-
-      productData.id = id;
-      productData.title = 'Flowers_'+id;
-      productData.description = 'We love flowers! They are beautiful creation of God!';
-      productData.imageUrl = 'flowers.jpg';
-      
-      return productData;
+      return getProductByID(id);
 
     }
 
@@ -593,9 +598,9 @@
             <div class="card-img-top productThumbnail" style="background-image:url('flowers.jpg');"></div>
           </div>
           <div class="card-block">
-            <h4 class="card-title">Flowers</h4>
-            <p class="card-text">$19.99</p>
-            <button type="button" class="btn btn-primary center-block product-link" data-product-id="1">View</button>
+            <h4 class="card-title"></h4>
+            <p class="card-text"></p>
+            <button type="button" class="btn btn-primary center-block product-link">View</button>
           </div>
         </div>
       </div>
