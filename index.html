@@ -191,21 +191,13 @@
       //display products
       displayCatalogProducts(products);
 
-      // var html = '';
-
-      // for (var i=0; i<products.length; i++) {
-      //   html += products[i].title + '<br />';
-      // }
-
-      // $('#catalog').html(html);
-
     }
 
     function displayCatalogProducts(products) {
-
-      //remove all loaded items
+      
       $('#catalog .card-deck').fadeOut(function(){
 
+        //remove all loaded items
         $('#catalog .card-deck').html('');
 
         var cardTemplate = $($('#card_template').children()[0]);
@@ -299,6 +291,15 @@
       $('.category-item').css('cursor', 'pointer');
     }
 
+    function bindNavBarAllItemsOnClick() {
+      $('.nav-link:not(.dropdown-toggle)').on('click', function(event){
+        hideCollapsibleNavBar();
+      });
+      $('.dropdown-item:not(.dropdown-toggle)').on('click', function(event){
+        hideCollapsibleNavBar();
+      });
+    }
+
     function getProductsData(fileName) {
       
       $.getJSON(fileName, function(data){
@@ -355,6 +356,12 @@
 
     }
 
+    function hideCollapsibleNavBar() {
+      if ('none' !== $('#navbar_toggler').css('display')) {
+        $('#navbar_toggler .ic-menu-img').click();
+      }
+    }
+
     $(document).ready(function(){
 
       getProductsData('products.json');
@@ -372,6 +379,7 @@
       bindProductLinksOnClick();
       bindNavbarCategoriesCSS();
       bindNavbarCategoriesOnClick();
+      bindNavBarAllItemsOnClick();
 
     });
 
@@ -382,7 +390,7 @@
   <div id="top_navbar_container">
     <nav class="navbar navbar-fixed-top navbar-light" style="background-color: #e3f2fd;">
       <div class="container-fluid">
-        <button class="navbar-toggler hidden-lg-up pull-xs-right" type="button" data-toggle="collapse" data-target="#collapsingNavbar">
+        <button id="navbar_toggler" class="navbar-toggler hidden-lg-up pull-xs-right" type="button" data-toggle="collapse" data-target="#collapsingNavbar">
         	<img class="ic-menu-img" src="ic_menu_black_24dp.png" alt="menu icon" />
         </button>
         <a class="navbar-brand" href="#">PICTURE SHOP</a>
