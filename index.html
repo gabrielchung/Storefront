@@ -2,7 +2,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <title>Bootstrap Example Template</title>
+  <title>Picture Shop - Storefront Sample</title>
   <meta charset="utf-8">
   <!-- Viewport Meta Tag -->
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -81,6 +81,25 @@
       margin-top: 30px;
       margin-bottom: 30px;
     }
+    #about_history {
+      padding-bottom: 50px;
+    }
+    .square-div {
+        width: 100%;
+        padding-bottom: 100%;
+        position: relative;
+    }
+    .square-div > div {
+      position: absolute;
+      top: 0; bottom: 0; left: 0; right: 0;
+    }
+    #contact {
+      padding-top: 50px;
+      padding-bottom: 50px;
+    }
+    #contact div {
+      padding: 30px;
+    }
     .footer {
       color: #fff;
       background: #bbb;
@@ -124,6 +143,7 @@
   
   <script>
 
+    var featuredProductsData;
     var productsData;
     var catalogData;
 
@@ -163,6 +183,54 @@
 
       });
       
+    }
+
+    function showFeaturedProducts() {
+
+      //get ids
+      var productIDs = featuredProductsData; 
+
+      //get products
+      var products = [];
+
+      for (var i=0; i<productIDs.length; i++) {
+        products.push(getProductByID(productIDs[i]));
+      }
+
+      //display products
+      displayFeaturedProducts(products);
+
+    }
+
+    function displayFeaturedProducts(products) {
+
+      var cardTemplate = $($('#featured_card_template').children()[0]);
+      var newRowTemplate = $(createRowDOMElement());
+      var thisCard;
+
+      for (var i=0; i<products.length; i++) {
+
+        thisCard = cardTemplate.clone();
+
+        $(thisCard).find('.card-title').html(products[i].title);
+        $(thisCard).find('.card-text').html("$"+products[i].price);
+        $(thisCard).find('.productThumbnail').css('background-image', 'url("'+products[i].imageUrl+'")');
+        $(thisCard).find('.product-link').data('product-id', products[i].id);
+
+        if (i % 3 === 0) {
+          //new row
+          $('#featured .card-deck').append(newRowTemplate.clone());
+        }
+
+        //append card to the last row
+        $($('#featured .card-deck .row')
+          [$('#featured .card-deck .row').length-1])
+            .append(thisCard);
+
+      }
+
+      bindFeaturedProductLinks();
+
     }
 
     function showCategory(categoryName) {
@@ -239,6 +307,12 @@
       return result;
     }
 
+    function bindFeaturedProductLinks() {
+      $('#featured .product-link').on('click', function(event){
+        showProduct($(this).data('product-id'));
+      });
+    }
+
     function bindCatalogProductLinks() {
       $('#catalog .product-link').on('click', function(event){
         showProduct($(this).data('product-id'));
@@ -300,12 +374,27 @@
       });
     }
 
-    function getProductsData(fileName) {
+    function getFeaturedProductsData(fileName, successFunc) {
+
+      $.getJSON(fileName, function(data){
+        
+        //catelogData is declared globally
+        featuredProductsData = data;
+
+        window[successFunc]();
+
+      });
+      
+    }
+
+    function getProductsData(fileName, successFunc) {
       
       $.getJSON(fileName, function(data){
         
         //productsData is declared globally
         productsData = data;
+
+        window[successFunc]();
 
       });
 
@@ -362,9 +451,13 @@
       }
     }
 
+    function getAndShowFeaturedProducts() {
+      getFeaturedProductsData('featured.json', 'showFeaturedProducts');
+    }
+
     $(document).ready(function(){
 
-      getProductsData('products.json');
+      getProductsData('products.json', 'getAndShowFeaturedProducts');
       getCatalogData('catalog.json');
 
       //For nested menu
@@ -541,42 +634,24 @@
     <!-- deck -->
     <div class="card-deck-wrapper">
       <div class="card-deck">
+      </div>
+    </div>
+    <!-- deck [END] -->
+
+    <div id="featured_card_template" class="displayNone">
+      <div class="col-xs-4">
         <div class="card">
           <div class="productThumbnailWrapper">
-            <!-- <img class="card-img-top productThumbnail" src="flowers.jpg" alt="Flowers"> -->
-            <div class="card-img-top productThumbnail" style="background-image:url('flowers.jpg');"></div>
+            <div class="card-img-top productThumbnail"></div>
           </div>
           <div class="card-block">
-            <h4 class="card-title">Flowers</h4>
-            <p class="card-text">$19.99</p>
-            <button type="button" class="btn btn-primary center-block product-link" data-product-id="1">View</button>
-          </div>
-        </div>
-        <div class="card">
-          <div class="productThumbnailWrapper">
-            <!-- <img class="card-img-top productThumbnail" src="flowers.jpg" alt="Flowers"> -->
-            <div class="card-img-top productThumbnail" style="background-image:url('rose.jpg');"></div>
-          </div>
-          <div class="card-block">
-            <h4 class="card-title">Rose</h4>
-            <p class="card-text">$59.99</p>
-            <button type="button" class="btn btn-primary center-block product-link" data-product-id="2">View</button>
-          </div>
-        </div>
-        <div class="card">
-          <div class="productThumbnailWrapper">
-            <!-- <img class="card-img-top productThumbnail" src="flowers.jpg" alt="Flowers"> -->
-            <div class="card-img-top productThumbnail" style="background-image:url('coffee.jpg');"></div>
-          </div>
-          <div class="card-block">
-            <h4 class="card-title">Suit</h4>
-            <p class="card-text">$259.00</p>
-            <button type="button" class="btn btn-primary center-block product-link" data-product-id="3">View</button>
+            <h4 class="card-title"></h4>
+            <p class="card-text"></p>
+            <button type="button" class="btn btn-primary center-block product-link">View</button>
           </div>
         </div>
       </div>
     </div>
-    <!-- deck [END] -->
 
   </div> <!-- container -->
 
@@ -596,7 +671,70 @@
     
     <h2 class="display-5 section-title">About</h2>
 
-    <div class="row vertical-spacing"></div>
+      <div class="row">
+
+        <div id="about_history" class="col-lg-6">
+
+          <p>
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit. In malesuada vitae mauris sit amet sodales. Donec consequat leo vulputate est interdum, et fermentum est semper. Quisque sit amet pretium diam. Vestibulum accumsan euismod lectus ut pellentesque. Cras eget egestas ligula. Suspendisse auctor libero lacus, non dictum nisi porta porttitor. Nunc tellus ligula, suscipit a lectus vitae, imperdiet scelerisque sem. Mauris dignissim, est ac vehicula vehicula, enim massa dictum mi, in porta elit est a quam. Suspendisse scelerisque efficitur libero, ut sollicitudin dolor vulputate eget. Ut molestie felis et euismod placerat. Aliquam sodales elementum elit, malesuada hendrerit lacus varius non. Pellentesque fringilla nisl at ex blandit dapibus. Donec id interdum justo. Suspendisse consequat erat orci. Phasellus convallis malesuada egestas.
+          </p>
+          <p>
+            Curabitur ac fringilla neque. Ut lacus eros, viverra in faucibus et, placerat vitae orci. Duis eget ex massa. Ut fringilla mi et enim tristique tempor. Quisque tincidunt purus et commodo ultrices. Integer hendrerit gravida nulla vel faucibus. Nulla nec arcu nisl. In sollicitudin in mauris id iaculis. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Nulla eu vulputate arcu.
+          </p>
+          <p>
+            Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Nulla dictum quis nisi eget lacinia. Maecenas rutrum fringilla justo, sit amet placerat massa vehicula vel. Ut nec ornare odio. Sed sit amet lectus non nisi ornare consectetur. Suspendisse id nisl lectus. Mauris malesuada, libero at vestibulum bibendum, sem odio porttitor ante, sed dictum dolor orci ut dolor. Curabitur ultricies convallis auctor.
+          </p>
+
+        </div>
+
+        <div class="col-lg-6">
+
+          <div class="row">
+
+            <div class="square-div">
+
+              <div>
+
+                <iframe
+                  frameborder="0" style="border:0" width="100%" height="100%"
+                  src="https://www.google.com/maps/embed/v1/place?key=AIzaSyCa1mnOcd76PcYdB2Mun_5yYC90-iYQD2M&q=Space+Needle,Seattle+WA" allowfullscreen>
+                </iframe>
+            
+              </div>
+
+            </div>
+
+          </div>
+
+          <div class="row">
+
+            <div id="contact">
+
+              <div>
+
+              <p>E-mail:</p>
+
+              <p>inquiry@pictureshopdemo.com</p>
+
+              </div>
+
+              <div>
+
+              <p>Address:</p>
+
+              <p>Space Needle
+              400 Broad St, Seattle,
+              WA 98109</p>
+
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
 
   </div>
 
@@ -616,7 +754,7 @@
       <div class="col-xs-4">
         <div class="card">
           <div class="productThumbnailWrapper">
-            <div class="card-img-top productThumbnail" style="background-image:url('flowers.jpg');"></div>
+            <div class="card-img-top productThumbnail"></div>
           </div>
           <div class="card-block">
             <h4 class="card-title"></h4>
