@@ -444,6 +444,7 @@
         $(this).fadeOut(function(){
           $(this).fadeIn();
         });
+        $('#ic_shopping_cart_circle_div').fadeTo('slow', 1);
       });
     }
 
@@ -589,6 +590,10 @@
 
           thisTableRow = rowTemplate.clone();
 
+          $(thisTableRow).removeAttr('id'); //id is called #shopping_cart_table_row_template
+
+          $(thisTableRow).find('input[type="checkbox"]').data('product-id', products[i].id);
+
           $(thisTableRow).find('.shopping-cart-product-thumbnail').css('background-image', 'url("'+products[i].imageUrl+'")');
 
           $(thisTableRow).find('.shopping-cart-product-name').html(products[i].title);
@@ -610,6 +615,8 @@
         }
 
         var tableFooterRow = $('#shopping_cart_table_footer_row_template').clone();
+
+        $(tableFooterRow).removeAttr('id'); //id is called #shopping_cart_table_footer_row_template
 
         $(tableFooterRow).find('#shopping_cart_product_total_price').html(totalPrice / 10000);
 
@@ -790,6 +797,109 @@
       });
     }
 
+    function deleteShoppingCartProductByID(id) {
+
+      var newShoppingCartData = [];
+      var tmpProductRecord;
+
+      for (var i=0; i<shoppingCartData.length; i++) {
+
+        if (id != shoppingCartData[i].id) {
+
+          //copy product record
+          tmpProductRecord = {id: shoppingCartData[i].id, qunatity: shoppingCartData[i].quantity};
+
+          newShoppingCartData.push(tmpProductRecord); 
+
+        }
+
+      }
+
+      shoppingCartData = newShoppingCartData;
+
+    }
+
+    function deleteSelectedItemsInShoppingCart() {
+      
+      var checkboxes = $('#shopping_cart_table_body input[type="checkbox"]');
+
+      for (var i=0; i<checkboxes.length; i++) {
+
+        if ($(checkboxes[i]).is(':checked')) {
+
+          deleteShoppingCartProductByID($(checkboxes[i]).data('product-id'));
+
+        }
+
+      }
+      
+      $(checkboxes).each(function(){
+        if ($(this).is(':checked')) {
+          $(this).closest('tr').fadeOut(function(){
+            $(this).closest('tr').remove();
+          });
+        }
+      });
+
+    }
+
+    function bindShoppingCartDeleteButton() {
+      $('#shopping_cart_delete_button').on('click', function(){
+        $(this).fadeOut(function(){
+          $(this).fadeIn();
+        });
+
+        deleteSelectedItemsInShoppingCart();
+      });
+    }
+
+    function setShoppingCartCheckboxes(value) {
+      
+      $('#shopping_cart_table_body input[type="checkbox"]').each(function(){
+
+        $(this).prop('checked', value);
+
+      });
+      
+    }
+
+    //
+    //
+    // all  checked - 
+    // some checked - 
+    // 0    checked - 
+    //
+
+    function bindShoppingCartSelectAllCheckbox() {
+
+      $('#shopping_cart_check_all_checkbox').on('click', function(){
+
+        var checkboxes = $('#shopping_cart_table_body input[type="checkbox"]');
+        var checkedCount = 0;
+
+        for (var i=0; i<checkboxes.length; i++) {
+
+          if ($(checkboxes[i]).is(':checked')) {
+
+            checkedCount ++;
+
+          }
+
+        }
+
+        if (checkboxes.length === checkedCount) {
+          //all checked
+          setShoppingCartCheckboxes(false);
+        } else if (0 === checkedCount) {
+          setShoppingCartCheckboxes(true);
+        } else {
+          setShoppingCartCheckboxes(true);
+        }
+
+      });
+
+    }
+
     $(document).ready(function(){
 
       getProductsData('products.json', 'getAndShowFeaturedProducts');
@@ -809,7 +919,9 @@
       bindNavbarCategoriesOnClick();
       bindNavBarAllItemsOnClick();
       bindIcShoppingCart();
-      
+      bindShoppingCartSelectAllCheckbox();
+      bindShoppingCartDeleteButton();
+
     });
 
   </script>
@@ -1168,7 +1280,7 @@
             <th width="10%">
               <div class="checkbox">
                 <label>
-                  <input type="checkbox"></input>
+                  <input id="shopping_cart_check_all_checkbox" type="checkbox"></input>
                 </label>
               </div>
             </th>
@@ -1185,8 +1297,8 @@
     </div>
 
     <div class="row">
-      <button type="button" class="btn btn-danger">Delete</button>
-      <button type="button" class="btn btn-primary pull-xs-right">Proceed</button>
+      <button id="shopping_cart_delete_button" type="button" class="btn btn-danger">Delete</button>
+      <button id="shopping_cart_proceed_to_checkout_button" type="button" class="btn btn-primary pull-xs-right">Proceed</button>
     </div>
 
     <div class="displayNone">
