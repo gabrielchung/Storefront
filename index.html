@@ -18,9 +18,39 @@
     #top_navbar_container {
       padding: 0;
     }
-    .ic-menu-img {
+    #search_form {
+      margin-right: 1rem;
+    }
+    .ic-img {
       width:20px;
       height:20px;
+    }
+    #ic_shopping_cart_inner_div {
+      margin-top: 0.3rem;
+      padding-top: 0.2rem;
+      padding-left: 0.35rem;
+      padding-bottom: 0.3rem;
+    }
+    #ic_shopping_cart_circle_div {
+      opacity: 0;
+      top: 0.9rem;
+      z-index: -9999;
+      position: absolute;
+      width:30px;
+      height:30px;
+      background: #ff6666; 
+      -moz-border-radius: 15px; 
+      -webkit-border-radius: 15px; 
+      border-radius: 15px;
+    }
+    #ic_shopping_cart_img {
+      cursor: pointer;
+      display: inline-block;
+      vertical-align: middle;
+      text-align: center;
+      width: 20px;
+      margin-left: auto;
+      margin-right: auto;
     }
     .dropdown-submenu {
       position: relative;
@@ -84,6 +114,9 @@
       margin-top: 30px;
       margin-bottom: 30px;
     }
+    .card button {
+      margin-bottom: 15px;
+    }
     #about_history {
       padding-bottom: 50px;
     }
@@ -116,6 +149,12 @@
     #product_details_price_and_buy_button {
       position: absolute;
       bottom: 0;
+    }
+    .shopping-cart-product-thumbnail {
+      width: 72px;
+      height: 72px;
+      background-repeat:no-repeat;
+      background-size:cover;
     }
     .footer {
       color: #fff;
@@ -223,6 +262,7 @@
     var featuredProductsData;
     var productsData;
     var catalogData;
+    var shoppingCartData = [];
 
     function scrollTo(hash) {
 
@@ -290,9 +330,10 @@
         thisCard = cardTemplate.clone();
 
         $(thisCard).find('.card-title').html(products[i].title);
-        $(thisCard).find('.card-text').html("$"+products[i].price);
+        $(thisCard).find('.price-tag').html("$"+products[i].price);
         $(thisCard).find('.productThumbnail').css('background-image', 'url("'+products[i].imageUrl+'")');
         $(thisCard).find('.product-link').data('product-id', products[i].id);
+        $(thisCard).find('.product-buy').data('product-id', products[i].id);
 
         if (i % 3 === 0) {
           //new row
@@ -307,6 +348,7 @@
       }
 
       bindFeaturedProductLinks();
+      bindFeaturedProductBuyLinks();
 
     }
 
@@ -354,9 +396,10 @@
           thisCard = cardTemplate.clone();
 
           $(thisCard).find('.card-title').html(products[i].title);
-          $(thisCard).find('.card-text').html("$"+products[i].price);
+          $(thisCard).find('.price-tag').html("$"+products[i].price);
           $(thisCard).find('.productThumbnail').css('background-image', 'url("'+products[i].imageUrl+'")');
           $(thisCard).find('.product-link').data('product-id', products[i].id);
+          $(thisCard).find('.product-buy').data('product-id', products[i].id);
 
           if (i % 3 === 0) {
             //new row
@@ -371,6 +414,7 @@
         }
 
         bindCatalogProductLinks();
+        bindCatalogProductBuyLinks();
 
         $('#catalog .card-deck').fadeIn();
 
@@ -382,6 +426,212 @@
       var result = document.createElement('div');
       result.className = 'row products-row';
       return result;
+    }
+
+    function bindFeaturedProductBuyLinks() {
+      $('#featured .product-buy').on('click', function(event){
+        addProductToCart($(this).data('product-id'));
+        $(this).fadeOut(function(){
+          $(this).fadeIn();
+        });
+        $('#ic_shopping_cart_circle_div').fadeTo('slow', 1);
+      });
+    }
+
+    function bindCatalogProductBuyLinks() {
+      $('#catalog .product-buy').on('click', function(event){
+        addProductToCart($(this).data('product-id'));
+        $(this).fadeOut(function(){
+          $(this).fadeIn();
+        });
+      });
+    }
+
+    function addProductToCart(id) {
+      
+      if ( ! productExistsInShoppingCart(id) ) {
+
+        //add product to cart
+        var thisCartProduct = {id: id, quantity: 1};
+
+        shoppingCartData.push(thisCartProduct);
+
+        //
+        //
+        // refresh shopping cart
+        //
+        //
+        refreshShoppingCart();
+
+        //
+        //
+        // signal added product
+        //
+        //
+
+      } 
+
+      // else : do nothing
+
+    }
+
+    function getShoppingCartProducts() {
+
+      //get ids and quantities
+      var productIDs = [];
+      var productQuantities = [];
+
+      for (var i=0; i<shoppingCartData.length; i++) {
+        productIDs.push(shoppingCartData[i].id);
+        productQuantities.push(shoppingCartData[i].quantity);
+      }
+
+      //get products
+      var products = [];
+      var tmpProduct;
+
+      for (var i=0; i<productIDs.length; i++) {
+
+        tmpProduct = getProductByID(productIDs[i]);
+        tmpProduct.quantity = productQuantities[i];
+
+        products.push(tmpProduct);
+      }
+
+      return products;
+    }
+
+    function updateShoppingCartData() {
+      
+      var quantityTextboxes = $('#shopping_cart_table').find('.shopping-cart-product-quantity input');
+      var thisQuantity;
+      
+      for (var i=0; i<quantityTextboxes.length; i++) {
+
+        thisQuantity = parseInt($(quantityTextboxes[i]).val());
+
+        if (isNaN(thisQuantity)) {
+          return null;
+        }
+
+        updateShoppingCartProductQuantity( $(quantityTextboxes[i]).data('product-id'), thisQuantity );
+
+      }
+
+      return true;
+
+    }
+
+    function updateShoppingCartProductQuantity(id, quantity) {
+
+      for (var j=0; j<shoppingCartData.length; j++) {
+
+        if (id == shoppingCartData[j].id) {
+
+          shoppingCartData[j].quantity = quantity;
+          return;
+
+        }
+
+      }
+      
+    }
+
+    function getTotalPrice() {
+
+      var quantityTextboxes = $('#shopping_cart_table').find('.shopping-cart-product-quantity input');
+      var thisQuantity;
+      var totalPrice = 0;
+      
+      for (var i=0; i<shoppingCartData.length; i++) {
+
+        // 10000 is the factor to eliminate demical calculation error
+        totalPrice += getProductByID( shoppingCartData[i].id ).price * shoppingCartData[i].quantity * 10000; 
+
+      }
+
+      totalPrice = totalPrice / 10000;
+
+      return totalPrice;
+
+    }
+
+    function bindQuantityTextboxesOnChange() {
+      $('#shopping_cart_table').find('.shopping-cart-product-quantity input').on('keyup', function(event){
+        //console.log($(this).data('product-id'));
+        if ( null === updateShoppingCartData() ) {
+
+          $('#shopping_cart_product_total_price').html('N/A');
+
+        } else {
+
+          $('#shopping_cart_product_total_price').html(getTotalPrice());
+
+        }
+        
+      })
+    }
+
+    function refreshShoppingCart() {
+      
+      $('#shopping_cart_table').fadeOut(function(){
+
+        //remove all content inside table body
+        $('#shopping_cart_table_body').html('');
+
+        var products = getShoppingCartProducts();
+
+        var rowTemplate = $('#shopping_cart_table_row_template');
+        var thisTableRow;
+        var totalPrice = 0;
+
+        for (var i=0; i<products.length; i++) {
+
+          thisTableRow = rowTemplate.clone();
+
+          $(thisTableRow).find('.shopping-cart-product-thumbnail').css('background-image', 'url("'+products[i].imageUrl+'")');
+
+          $(thisTableRow).find('.shopping-cart-product-name').html(products[i].title);
+          $(thisTableRow).find('.shopping-cart-product-unit-price').html(products[i].price);
+          
+          $(thisTableRow).find('.shopping-cart-product-quantity input').val(products[i].quantity);
+          $(thisTableRow).find('.shopping-cart-product-quantity input').data('product-id', products[i].id);
+
+          $(thisTableRow).find('.shopping-cart-product-price').html(products[i].price * products[i].quantity);
+
+          //
+          // mulitplying by 10000 to eliminate calculation error of javascript
+          //
+          totalPrice += products[i].price * 10000 * products[i].quantity;
+
+          //append table row to table body
+          $('#shopping_cart_table_body').append(thisTableRow);
+
+        }
+
+        var tableFooterRow = $('#shopping_cart_table_footer_row_template').clone();
+
+        $(tableFooterRow).find('#shopping_cart_product_total_price').html(totalPrice / 10000);
+
+        $('#shopping_cart_table_body').append(tableFooterRow);
+
+        bindQuantityTextboxesOnChange();
+
+        $('#shopping_cart_table').fadeIn();
+
+      });
+
+    }
+
+    function productExistsInShoppingCart(id) {
+
+      for (var i=0; i<shoppingCartData.length; i++) {
+        if (id === shoppingCartData[i].id) {
+          return true;
+        }
+      }
+
+      return false;
     }
 
     function bindFeaturedProductLinks() {
@@ -524,12 +774,20 @@
 
     function hideCollapsibleNavBar() {
       if ('none' !== $('#navbar_toggler').css('display')) {
-        $('#navbar_toggler .ic-menu-img').click();
+        $('#ic_menu_img').click();
       }
     }
 
     function getAndShowFeaturedProducts() {
       getFeaturedProductsData('featured.json', 'showFeaturedProducts');
+    }
+
+    function bindIcShoppingCart() {
+      $('#ic_shopping_cart').on('click', function() {
+        $('#shopping_cart').show();
+        scrollTo('#shopping_cart');
+        $('#ic_shopping_cart_circle_div').fadeTo('slow', 0);
+      });
     }
 
     $(document).ready(function(){
@@ -550,7 +808,8 @@
       bindNavbarCategoriesCSS();
       bindNavbarCategoriesOnClick();
       bindNavBarAllItemsOnClick();
-
+      bindIcShoppingCart();
+      
     });
 
   </script>
@@ -560,8 +819,14 @@
   <div id="top_navbar_container">
     <nav class="navbar navbar-fixed-top navbar-light" style="background-color: #e3f2fd;">
       <div class="container-fluid">
+        <div id="ic_shopping_cart" class="pull-xs-right" type="button">
+          <div id="ic_shopping_cart_circle_div"></div>
+          <div id="ic_shopping_cart_inner_div">
+        	  <img id="ic_shopping_cart_img" class="ic-img" src="ic_shopping_cart_24dp.png" alt="menu icon" />
+          </div>
+        </div>
         <button id="navbar_toggler" class="navbar-toggler hidden-lg-up pull-xs-right" type="button" data-toggle="collapse" data-target="#collapsingNavbar">
-        	<img class="ic-menu-img" src="ic_menu_black_24dp.png" alt="menu icon" />
+        	<img id="ic_menu_img" class="ic-img center-block" src="ic_menu_black_24dp.png" alt="menu icon" />
         </button>
         <a class="navbar-brand" href="#">PICTURE SHOP</a>
         <div id="collapsingNavbar" class="collapse navbar-toggleable-md">
@@ -612,7 +877,7 @@
               <a class="nav-link" href="#product_details">Product Details</a>
             </li>
           </ul>
-          <form class="form-inline pull-xs-right">
+          <form id="search_form" class="form-inline pull-xs-right">
             <input class="form-control" type="text" placeholder="">
             <button class="btn btn-success-outline" type="submit">Search</button>
           </form>
@@ -723,8 +988,10 @@
           </div>
           <div class="card-block">
             <h4 class="card-title"></h4>
+            <h4><div class="price-tag label label-success center-block"></div></h4>
             <p class="card-text"></p>
             <button type="button" class="btn btn-primary center-block product-link">View</button>
+            <button type="button" class="btn btn-danger center-block product-buy">Buy</button>
           </div>
         </div>
       </div>
@@ -835,14 +1102,14 @@
           </div>
           <div class="card-block">
             <h4 class="card-title"></h4>
+            <h4><div class="price-tag label label-success center-block"></div></h4>
             <p class="card-text"></p>
             <button type="button" class="btn btn-primary center-block product-link">View</button>
+            <button type="button" class="btn btn-danger center-block product-buy">Buy</button>
           </div>
         </div>
       </div>
     </div>
-
-    <div class="row vertical-spacing"></div>
 
   </div>
 
@@ -890,7 +1157,79 @@
 
   </div>
 
-  
+  <div id="shopping_cart" class="container section displayNone">
+
+    <h2 class="display-5 section-title">Shopping Cart</h2>
+
+    <div class="row">
+      <table id="shopping_cart_table" class="table table-hover">
+        <thead class="thead-default">
+          <tr>
+            <th width="10%">
+              <div class="checkbox">
+                <label>
+                  <input type="checkbox"></input>
+                </label>
+              </div>
+            </th>
+            <th width="12.5%"></th>
+            <th width="35%">Product Name</th>
+            <th width="15%">Unit Price</th>
+            <th width="12.5%">Quantity</th>
+            <th width="15%">Price</th>
+          </tr>
+        </thead>
+        <tbody id="shopping_cart_table_body">
+        </tbody>
+      </table>
+    </div>
+
+    <div class="row">
+      <button type="button" class="btn btn-danger">Delete</button>
+      <button type="button" class="btn btn-primary pull-xs-right">Proceed</button>
+    </div>
+
+    <div class="displayNone">
+      <table>
+        <tbody>
+          <tr id="shopping_cart_table_row_template">    
+            <td>
+              <div class="checkbox">
+                <label>
+                  <input type="checkbox"></input>
+                </label>
+              </div>
+            </td>
+            <td><div class="shopping-cart-product-thumbnail"></div></td>
+            <td class="shopping-cart-product-name">Product Name</td>
+            <td class="shopping-cart-product-unit-price">Price</td>
+            <td class="shopping-cart-product-quantity">
+              <fieldset class="form-group">
+                <input type="text" class="form-control" id="formGroupExampleInput" placeholder="">
+              </fieldset>
+            </td>
+            <td class="shopping-cart-product-price"></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="displayNone">
+      <table>
+        <tbody>
+          <tr id="shopping_cart_table_footer_row_template" class="table-info">    
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td>Total</td>
+            <td id="shopping_cart_product_total_price"></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
 
   <div class="container">
     <div class="row vertical-spacing"></div>
