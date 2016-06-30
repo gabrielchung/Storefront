@@ -8,12 +8,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <!-- Bootstrap CSS -->
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.2/css/bootstrap.min.css" integrity="sha384-y3tfxAZXuh4HwSYylfB+J125MxIs6mR5FOHamPBG064zB+AFeWH94NdvaCBm8qnd" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/themes/smoothness/jquery-ui.css">
   <style>
     .displayNone {
       display: none;
     }
     body {
       position: relative; /* Needed for scrollspy */
+    }
+    .scrolloff { /* For Disabling Google Maps Embed Mouse Scroll */
+      pointer-events: none;
     }
     #top_navbar_container {
       padding: 0;
@@ -136,6 +140,9 @@
     #contact div {
       padding: 30px;
     }
+    #square_div_wrapper {
+      padding: 15px;
+    }
     #product_details_wrapper {
       position: relative;
     }
@@ -155,6 +162,22 @@
       height: 72px;
       background-repeat:no-repeat;
       background-size:cover;
+    }
+    #checkout_section {
+      margin-top: 35px;
+    }
+    #checkout_form {
+      background-color: #c4e3f3;
+      padding: 2rem 2rem;
+    }
+    .checkout-form-2-col-inline {
+      padding: 0;
+    }
+    .checkout-form-2-col-inline-first-item {
+      padding-right: 0.8rem;
+    }
+    #checkout_back_button {
+      margin-bottom: 35px;
     }
     .footer {
       color: #fff;
@@ -247,10 +270,9 @@
       margin-right: 0;
     }
   </style>
-  <!-- JavaScript: placed at the end of the document so the pages load faster -->
   <!-- jQuery library -->
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
-
+  <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
   <script src="tether.min.js"></script>
   
 
@@ -656,6 +678,7 @@
       
       if (null !== pd) {
         displayProductInProductDetails(pd);
+        bindProductDetailsBuyLink();
       } else {
         console.log('Product cannot be found');
       }
@@ -669,10 +692,21 @@
     }
 
     function displayProductInProductDetails(productData) {
+      $('#product_details_buy_button').data('product-id', productData.id);
       $('#product_details_title').text(productData.title);
       $('#product_details_description').text(productData.description);
       $('#product_details_price').text('$' + productData.price);
       $('#productImage').css('background-image', 'url("'+productData.imageUrl+'")');
+    }
+
+    function bindProductDetailsBuyLink() {
+      $('#product_details_buy_button').on('click', function(event){
+        addProductToCart($(this).data('product-id'));
+        $(this).fadeOut(function(){
+          $(this).fadeIn();
+        });
+        $('#ic_shopping_cart_circle_div').fadeTo('slow', 1);
+      });
     }
 
     function bindProductLinksOnClick() {
@@ -883,16 +917,141 @@
         }
 
         if (checkboxes.length === checkedCount) {
+
           //all checked
+
+          $(this).prop('checked', false);
           setShoppingCartCheckboxes(false);
+
         } else if (0 === checkedCount) {
+
+          //none checked
+
+          $(this).prop('checked', true);
           setShoppingCartCheckboxes(true);
+          
         } else {
+
+          //some checked
+
+          $(this).prop('checked', true);
           setShoppingCartCheckboxes(true);
+
         }
 
       });
 
+    }
+
+    function bindShoppingCartProceedButton() {
+
+      $('#shopping_cart_proceed_to_checkout_button').on('click', function(event){
+
+        $('#shopping_cart').css('background-color', '#2d9bd2');
+        
+        $('#shopping_cart').animate({
+          backgroundColor: '#fffff'
+        }, 1000);
+
+        $('#shopping_cart_heading').fadeOut(function(){
+          $('#checkout_heading').fadeIn();
+        });
+
+        setShoppingCartInputFieldsEnabled(false);
+
+        $('#shopping_cart_delete_button').fadeOut(function(){
+          $('#checkout_back_button').fadeIn();
+          $('#checkout_form').fadeIn();
+        });
+        
+        $('#shopping_cart_proceed_to_checkout_button').fadeOut();
+
+      });
+
+    }
+
+    function bindCheckoutBackButton() {
+
+      $('#checkout_back_button').on('click', function(event){
+
+        $('#checkout_heading').fadeOut(function(){
+          $('#shopping_cart_heading').fadeIn();
+        });
+
+        setShoppingCartInputFieldsEnabled(true);
+
+        $('#checkout_form').fadeOut();
+
+        $('#checkout_back_button').fadeOut(function(){
+          $('#shopping_cart_delete_button').fadeIn();
+          $('#shopping_cart_proceed_to_checkout_button').fadeIn();
+        });
+
+      });
+
+    }
+
+    function setShoppingCartInputFieldsEnabled(enabledAndNotDisabled) {
+
+      setInputElemEnabled($('#shopping_cart_check_all_checkbox'), enabledAndNotDisabled);
+
+      $('#shopping_cart_table_body input[type="checkbox"]').each(function(){
+        setInputElemEnabled(this, enabledAndNotDisabled);
+      });
+
+      $('#shopping_cart_table').find('.shopping-cart-product-quantity input').each(function(){
+        setInputElemEnabled(this, enabledAndNotDisabled);
+      });
+
+    }
+
+    function setInputElemEnabled(elemCheckbox, enabledAndNotDisabled) {
+      if (enabledAndNotDisabled) {
+        $(elemCheckbox).removeAttr('disabled');
+      } else {
+        $(elemCheckbox).attr('disabled', '')
+      }
+    }
+
+    function disableGoogleMapsEmbedMouseScrolling() {
+
+      //
+      //
+      // Wheel event does not work for iframe. This method is abandoned.
+      //
+      //
+
+      // console.log('1');
+      //
+      // $('#google_map').on('wheel', function(event){
+      //   console.log('2');
+      //   console.log(event);
+      //   event.preventDefault();
+      // });
+
+      $('#google_map').addClass('scrolloff');               // set the mouse events to none when doc is ready
+        
+      $('#google_map_overlay').on("mouseup",function(){     // lock it when mouse up
+          $('#google_map').addClass('scrolloff'); 
+          //somehow the mouseup event doesn't get call...
+      });
+      $('#google_map_overlay').on("mousedown",function(){   // when mouse down, set the mouse events free
+          $('#google_map').removeClass('scrolloff');
+          changeGoogleMapWrapperBackgroundColor(true);
+      });
+
+      $("#google_map").mouseleave(function () {             // becuase the mouse up doesn't work... 
+          $('#google_map').addClass('scrolloff');           // set the pointer events to none when mouse leaves the map area
+          changeGoogleMapWrapperBackgroundColor(false);     // or you can do it on some other event
+      });
+    }
+
+    function changeGoogleMapWrapperBackgroundColor(showColor) {
+      if (showColor) {
+        $('#square_div_wrapper').animate({backgroundColor: '#0275d8'}, 1000);
+      } else {
+        $('#square_div_wrapper').animate({backgroundColor: '#ffffff'}, 1000);
+      }
     }
 
     $(document).ready(function(){
@@ -916,6 +1075,9 @@
       bindIcShoppingCart();
       bindShoppingCartSelectAllCheckbox();
       bindShoppingCartDeleteButton();
+      bindShoppingCartProceedButton();
+      bindCheckoutBackButton();
+      disableGoogleMapsEmbedMouseScrolling();
 
     });
 
@@ -1142,15 +1304,19 @@
 
           <div class="row">
 
-            <div class="square-div">
+            <div id="square_div_wrapper">
 
-              <div>
+              <div class="square-div">
 
-                <iframe
-                  frameborder="0" style="border:0" width="100%" height="100%"
-                  src="https://www.google.com/maps/embed/v1/place?key=AIzaSyCa1mnOcd76PcYdB2Mun_5yYC90-iYQD2M&q=Space+Needle,Seattle+WA" allowfullscreen>
-                </iframe>
-            
+                <div id="google_map_overlay">
+
+                  <iframe id="google_map"
+                    frameborder="0" style="border:0" width="100%" height="100%"
+                    src="https://www.google.com/maps/embed/v1/place?key=AIzaSyCa1mnOcd76PcYdB2Mun_5yYC90-iYQD2M&q=Space+Needle,Seattle+WA" allowfullscreen>
+                  </iframe>
+
+                </div>
+
               </div>
 
             </div>
@@ -1251,7 +1417,7 @@
             </div>
 
             <div class="row">
-              <button type="button" class="btn btn-danger">Buy</button>
+              <button id="product_details_buy_button" type="button" class="btn btn-danger">Buy</button>
             </div>
 
           </div>
@@ -1266,7 +1432,8 @@
 
   <div id="shopping_cart" class="container section displayNone">
 
-    <h2 class="display-5 section-title">Shopping Cart</h2>
+    <h2 id="shopping_cart_heading" class="display-5 section-title">Shopping Cart</h2>
+    <h2 id="checkout_heading" class="display-5 section-title displayNone">Checkout</h2>
 
     <div class="row">
       <table id="shopping_cart_table" class="table table-hover">
@@ -1294,6 +1461,64 @@
     <div class="row">
       <button id="shopping_cart_delete_button" type="button" class="btn btn-danger">Delete</button>
       <button id="shopping_cart_proceed_to_checkout_button" type="button" class="btn btn-primary pull-xs-right">Proceed</button>
+    </div>
+
+    <div id="checkout_section" class="row">
+      <div class="col-lg-4">
+        <button id="checkout_back_button" type="button" class="btn btn-secondary displayNone">Back</button>
+      </div> <!-- left col -->
+      <div class="col-lg-8">
+        <form id="checkout_form" class="displayNone">
+          <h3 class="display-7">Shipping Info</h3>
+          <div>
+            <fieldset class="form-group">
+                <div class="col-sm-6 checkout-form-2-col-inline checkout-form-2-col-inline-first-item">
+                  <label for="checkout_form_first_name">First Name</label>
+                  <input type="text" class="form-control" id="checkout_form_first_name" placeholder="">
+                </div>
+                <div class="col-sm-6 checkout-form-2-col-inline">
+                  <label for="checkout_form_last_name">Last Name</label>
+                  <input type="text" class="form-control" id="checkout_form_last_name" placeholder="">
+                </div>
+            </fieldset>
+          </div>
+          <fieldset class="form-group">
+            <div class="col-sm-6 checkout-form-2-col-inline checkout-form-2-col-inline-first-item">
+              <label for="checkout_form_email_address">Email Address</label>
+              <input type="email" class="form-control" id="checkout_form_email_address" placeholder="Enter e-mail address">
+              <!--<small class="text-muted">We respect your privacy.</small>-->
+            </div>
+            <div class="col-sm-6 checkout-form-2-col-inline">
+              <label for="checkout_form_phone_number">Phone Number</label>
+              <input type="text" class="form-control" id="checkout_form_phone_number" placeholder="">
+            </div>
+          </fieldset>
+          <label>Shipping Method</label>
+          <div class="radio">
+            <label>
+              <input type="radio" name="optionsRadios" id="optionsRadios1" value="air" checked>
+              Air (Speed)
+            </label>
+          </div>
+          <div class="radio">
+            <label>
+              <input type="radio" name="optionsRadios" id="optionsRadios2" value="option2">
+              Air (Normal)
+            </label>
+          </div>
+          <div class="radio">
+            <label>
+              <input type="radio" name="optionsRadios" id="optionsRadios3" value="option3">
+              Sea
+            </label>
+          </div>
+          <fieldset class="form-group">
+            <label for="exampleTextarea">Remarks</label>
+            <textarea class="form-control" id="exampleTextarea" rows="3"></textarea>
+          </fieldset>
+          <button type="submit" class="btn btn-primary">Submit</button>
+        </form>
+      </div> <!-- right col -->
     </div>
 
     <div class="displayNone">
