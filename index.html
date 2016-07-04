@@ -892,13 +892,6 @@
       
     }
 
-    //
-    //
-    // all  checked - 
-    // some checked - 
-    // 0    checked - 
-    //
-
     function bindShoppingCartSelectAllCheckbox() {
 
       $('#shopping_cart_check_all_checkbox').on('click', function(){
@@ -1009,7 +1002,7 @@
       if (enabledAndNotDisabled) {
         $(elemCheckbox).removeAttr('disabled');
       } else {
-        $(elemCheckbox).attr('disabled', '')
+        $(elemCheckbox).attr('disabled', '');
       }
     }
 
@@ -1054,6 +1047,46 @@
       }
     }
 
+    function bindCheckoutPersonalInfoSubmitButton() {
+      $('#checkout_personal_info_submit_button').on('click', function(){
+        $('#checkout_personal_info').fadeOut(function(){
+          $('#checkout_payment').fadeIn();
+        });
+      });
+    }
+
+    function bindCheckoutPaymentBackButton() {
+      $('#checkout_payment_back_button').on('click', function(){
+        $('#checkout_payment').fadeOut(function(){
+          $('#checkout_personal_info').fadeIn();
+        });
+      });
+    }
+
+    function bindCheckoutBillingSameAsCheckbox() {
+      $('#checkout_billing_same_as_checkbox').on('click', function(){
+
+        if ( ! $('#checkout_billing_same_as_checkbox').is(':checked') ) {
+
+          $('#checkout_billing_details').fadeIn();
+
+        } else {
+
+          $('#checkout_billing_details').fadeOut();
+
+        }
+
+      });
+    }
+
+    function bindCheckoutPaymentConfirmButton() {
+      $('#checkout_payment_confirm_button').on('click', function(){
+        $('#checkout_payment_confirm_button').fadeOut(function(){
+          $('#checkout_payment_confirm_button').fadeIn();
+        });
+      });
+    }
+
     $(document).ready(function(){
 
       getProductsData('products.json', 'getAndShowFeaturedProducts');
@@ -1078,6 +1111,10 @@
       bindShoppingCartProceedButton();
       bindCheckoutBackButton();
       disableGoogleMapsEmbedMouseScrolling();
+      bindCheckoutPersonalInfoSubmitButton();
+      bindCheckoutPaymentBackButton();
+      bindCheckoutBillingSameAsCheckbox();
+      bindCheckoutPaymentConfirmButton();
 
     });
 
@@ -1464,11 +1501,8 @@
     </div>
 
     <div id="checkout_section" class="row">
-      <div class="col-lg-4">
-        <button id="checkout_back_button" type="button" class="btn btn-secondary displayNone">Back</button>
-      </div> <!-- left col -->
-      <div class="col-lg-8">
-        <form id="checkout_form" class="displayNone">
+      <div id="checkout_form" class="displayNone">
+        <form id="checkout_personal_info">
           <h3 class="display-7">Shipping Info</h3>
           <div>
             <fieldset class="form-group">
@@ -1485,13 +1519,21 @@
           <fieldset class="form-group">
             <div class="col-sm-6 checkout-form-2-col-inline checkout-form-2-col-inline-first-item">
               <label for="checkout_form_email_address">Email Address</label>
-              <input type="email" class="form-control" id="checkout_form_email_address" placeholder="Enter e-mail address">
+              <input type="email" class="form-control" id="checkout_form_email_address" placeholder="">
               <!--<small class="text-muted">We respect your privacy.</small>-->
             </div>
             <div class="col-sm-6 checkout-form-2-col-inline">
               <label for="checkout_form_phone_number">Phone Number</label>
               <input type="text" class="form-control" id="checkout_form_phone_number" placeholder="">
+              <small class="text-muted">Example: +61-0412-3456-7890</small>
             </div>
+          </fieldset>
+          <fieldset class="form-group">
+            <label for="checkout_form_email_address">Address</label>
+            <input type="text" class="form-control" id="checkout_form_address_1" placeholder="Line 1">
+          </fieldset>
+          <fieldset class="form-group">
+            <input type="text" class="form-control" id="checkout_form_address_2" placeholder="Line 2">
           </fieldset>
           <label>Shipping Method</label>
           <div class="radio">
@@ -1516,9 +1558,56 @@
             <label for="exampleTextarea">Remarks</label>
             <textarea class="form-control" id="exampleTextarea" rows="3"></textarea>
           </fieldset>
-          <button type="submit" class="btn btn-primary">Submit</button>
+          <button id="checkout_back_button" type="button" class="btn btn-secondary displayNone">Back</button>
+          <button id="checkout_personal_info_submit_button" type="button" class="btn btn-primary pull-xs-right">Next</button>
         </form>
-      </div> <!-- right col -->
+        <form id="checkout_payment" class="displayNone">
+          <h3 class="display-7">Payment</h3>
+          <label>Payment Method</label>
+          <div class="radio">
+            <label>
+              <input type="radio" name="optionsRadios" id="optionsRadios1" value="air" checked>
+              Cheque Payment
+            </label>
+          </div>
+          <div class="radio">
+            <label>
+              <input type="radio" name="optionsRadios" id="optionsRadios2" value="option2">
+              Paypal
+            </label>
+          </div>
+          <label>Billing Details</label>
+          <div class="checkbox">
+            <label>
+              <input id="checkout_billing_same_as_checkbox" type="checkbox" value="" checked>
+              Same as Shipping
+            </label>
+          </div>
+          <div id="checkout_billing_details" class="displayNone">
+            <div>
+              <fieldset class="form-group">
+                  <div class="col-sm-6 checkout-form-2-col-inline checkout-form-2-col-inline-first-item">
+                    <label for="checkout_form_first_name">First Name</label>
+                    <input type="text" class="form-control" id="checkout_form_first_name" placeholder="">
+                  </div>
+                  <div class="col-sm-6 checkout-form-2-col-inline">
+                    <label for="checkout_form_last_name">Last Name</label>
+                    <input type="text" class="form-control" id="checkout_form_last_name" placeholder="">
+                  </div>
+              </fieldset>
+            </div>
+            <fieldset class="form-group">
+              <label for="checkout_form_email_address">Address</label>
+              <input type="text" class="form-control" id="checkout_form_address_1" placeholder="Line 1">
+            </fieldset>
+            <fieldset class="form-group">
+              <input type="text" class="form-control" id="checkout_form_address_2" placeholder="Line 2">
+            </fieldset>
+          </div>
+          <button id="checkout_payment_back_button" type="button" class="btn btn-secondary">Back</button>
+          <button id="checkout_payment_confirm_button" type="button" class="btn btn-primary pull-xs-right">Confirm</button>
+        </form>
+      </div>
     </div>
 
     <div class="displayNone">
