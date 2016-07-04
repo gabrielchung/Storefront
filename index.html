@@ -1088,6 +1088,21 @@
       });
     }
 
+    function bindNavItemsToAvoidAnchorJumping() {
+
+      $(window).on('hashchange', function(){
+        window.history.replaceState('', '', '.');
+      });
+
+      // $('.navbar .nav-item').on('click', function(event){
+        // avoid # anchor
+        // setTimeout(function(){
+        //   console.log(2);
+        //   window.history.replaceState('', '', '.');
+        // }, 1000);
+      // });
+    }
+
     $(document).ready(function(){
 
       getProductsData('products.json', 'getAndShowFeaturedProducts');
@@ -1117,12 +1132,13 @@
       bindCheckoutBillingSameAsCheckbox();
       bindCheckoutPaymentConfirmButton();
 
+      bindNavItemsToAvoidAnchorJumping();
+
     });
 
   </script>
 </head>
 <body data-spy="scroll" data-target="#top_navbar_container">
-
   <div id="top_navbar_container">
     <nav class="navbar navbar-fixed-top navbar-light" style="background-color: #e3f2fd;">
       <div class="container-fluid">
