@@ -354,6 +354,8 @@
 
         thisCard = cardTemplate.clone();
 
+        $(thisCard).find('.product-card').data('product-id', products[i].id);
+
         $(thisCard).find('.card-title').html(products[i].title);
         $(thisCard).find('.price-tag').html("$"+products[i].price);
         $(thisCard).find('.productThumbnail').css('background-image', 'url("'+products[i].imageUrl+'")');
@@ -420,6 +422,8 @@
 
           thisCard = cardTemplate.clone();
 
+          $(thisCard).find('.product-card').data('product-id', products[i].id);
+
           $(thisCard).find('.card-title').html(products[i].title);
           $(thisCard).find('.price-tag').html("$"+products[i].price);
           $(thisCard).find('.productThumbnail').css('background-image', 'url("'+products[i].imageUrl+'")');
@@ -440,6 +444,8 @@
 
         bindCatalogProductLinks();
         bindCatalogProductBuyLinks();
+
+        updateProductCardsColor(false);
 
         $('#catalog .card-deck').fadeIn();
 
@@ -483,6 +489,7 @@
         shoppingCartData.push(thisCartProduct);
 
         refreshShoppingCart();
+        updateProductCardsColor(true);
 
       } 
 
@@ -567,16 +574,38 @@
 
       totalPrice = totalPrice / 10000;
 
-      console.log(shoppingCartData);
-      console.log(totalPrice);
-
       return totalPrice;
 
     }
 
+    function calculateShoppingCartProductsSubtotal() {
+
+      $('#shopping_cart_table_body').find('tr:not(.table-info)').each(function(){
+
+        var unitPrice = $(this).find('.shopping-cart-product-unit-price').html() * 10000;
+        var quantity = $(this).find('.shopping-cart-product-quantity input').val();
+
+        if (isNaN(parseInt(quantity))) {
+
+          $(this).find('.shopping-cart-product-price').html('N/A');
+
+        } else {
+
+          $(this).find('.shopping-cart-product-price').html(unitPrice / 10000 * quantity);
+
+        }
+
+        
+      });
+
+    }
+
     function bindQuantityTextboxesOnChange() {
+
       $('#shopping_cart_table').find('.shopping-cart-product-quantity input').on('keyup', function(event){
-        //console.log($(this).data('product-id'));
+
+        calculateShoppingCartProductsSubtotal();
+
         if ( null === updateShoppingCartData() ) {
 
           $('#shopping_cart_product_total_price').html('N/A');
@@ -588,6 +617,41 @@
         }
         
       })
+    }
+
+    function updateProductCardsColor(animateColor) {
+
+      $('.product-card').data('in-shopping-cart', false);
+
+      for (var i=0; i<shoppingCartData.length; i++) {
+
+        $('.product-card')
+          .filter(function () {
+              return $(this).data('product-id') == shoppingCartData[i].id
+          })
+          .data('in-shopping-cart', true)
+          .animate({backgroundColor: '#ffb3b3'}, animateColor ? 800 : 0 );
+
+      }
+      
+      // for not selected shopping cart products
+
+      $('.product-card')
+        .filter(function () {
+            return $(this).data('in-shopping-cart') != true 
+            && (
+                  $(this).css('backgroundColor') != 'rgb(255, 255, 255)'
+                  &&
+                  $(this).css('backgroundColor') != '#ffb3b3'
+               );
+            //For some weird reason, jquery.css('bgcolor') returns rgb instead of hex value.
+            //Code them both in, for safety reason.
+        })
+        .animate({backgroundColor: '#ffffff'}, animateColor ? 800 : 0 );
+      
+
+      $('.product-card').data('in-shopping-cart', false);
+
     }
 
     function refreshShoppingCart() {
@@ -873,6 +937,8 @@
       });
 
       $('#shopping_cart_product_total_price').html(getTotalPrice());
+
+      updateProductCardsColor(true);
 
     }
 
@@ -1313,7 +1379,7 @@
 
     <div id="featured_card_template" class="displayNone">
       <div class="col-md-4 product-card-wrapper">
-        <div class="card">
+        <div class="card product-card">
           <div class="productThumbnailWrapper">
             <div class="card-img-top productThumbnail"></div>
           </div>
@@ -1431,7 +1497,7 @@
 
     <div id="card_template" class="displayNone">
       <div class="col-md-4 product-card-wrapper">
-        <div class="card">
+        <div class="card product-card">
           <div class="productThumbnailWrapper">
             <div class="card-img-top productThumbnail"></div>
           </div>
