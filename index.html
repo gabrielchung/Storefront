@@ -298,8 +298,11 @@
 
     var featuredProductsData;
     var productsData;
+    var categoriesData;
     var catalogData;
     var shoppingCartData = [];
+    var staticMode = true;
+    var dataEndpoint = 'https://betterworld.company/lab/storefront/api/data.php';
 
     function scrollTo(hash) {
 
@@ -370,7 +373,11 @@
 
         $(thisCard).find('.card-title').html(products[i].title);
         $(thisCard).find('.price-tag').html("$"+products[i].price);
-        $(thisCard).find('.productThumbnail').css('background-image', 'url("'+products[i].imageUrl+'")');
+        if (undefined !== products[i].imageUrl) {
+          $(thisCard).find('.productThumbnail').css('background-image', 'url("'+products[i].imageUrl+'")');
+        } else {
+          $(thisCard).find('.productThumbnail').css('background-image', 'url("productImages/sport3.jpg")');
+        }
         $(thisCard).find('.product-link').data('product-id', products[i].id);
         $(thisCard).find('.product-buy').data('product-id', products[i].id);
 
@@ -391,14 +398,16 @@
 
     }
 
-    function showCategory(categoryName) {
+    //function showCategory(categoryName) {
+    function showCategory(categoryID) {
       
       $('#catalog').show();
       $('#nav_item_catalog').show();
       
       scrollTo('#catalog');
 
-      var cd = getCategoryByName(categoryName);
+      //var cd = getCategoryByName(categoryName);
+      var cd = getCategoryByID(categoryID);
       displayCategory(cd);
     }
 
@@ -438,7 +447,12 @@
 
           $(thisCard).find('.card-title').html(products[i].title);
           $(thisCard).find('.price-tag').html("$"+products[i].price);
-          $(thisCard).find('.productThumbnail').css('background-image', 'url("'+products[i].imageUrl+'")');
+          //$(thisCard).find('.productThumbnail').css('background-image', 'url("'+products[i].imageUrl+'")');
+          if (undefined !== products[i].imageUrl) {
+            $(thisCard).find('.productThumbnail').css('background-image', 'url("'+products[i].imageUrl+'")');
+          } else {
+            $(thisCard).find('.productThumbnail').css('background-image', 'url("productImages/sport3.jpg")');
+          }
           $(thisCard).find('.product-link').data('product-id', products[i].id);
           $(thisCard).find('.product-buy').data('product-id', products[i].id);
 
@@ -687,7 +701,12 @@
 
           $(thisTableRow).find('input[type="checkbox"]').data('product-id', products[i].id);
 
-          $(thisTableRow).find('.shopping-cart-product-thumbnail').css('background-image', 'url("'+products[i].imageUrl+'")');
+          
+          if (undefined !== products[i].imageUrl) {
+            $(thisTableRow).find('.shopping-cart-product-thumbnail').css('background-image', 'url("'+products[i].imageUrl+'")');
+          } else {
+            $(thisTableRow).find('.shopping-cart-product-thumbnail').css('background-image', 'url("productImages/sport3.jpg")');
+          }
 
           $(thisTableRow).find('.shopping-cart-product-name').html(products[i].title);
           $(thisTableRow).find('.shopping-cart-product-unit-price').html(products[i].price);
@@ -788,6 +807,63 @@
       });
     }
 
+    function insertCategoriesDataToMainNavBar() {
+
+      var navbarItemTemplate = $('#navbar_item_template').children()[0];
+      var navbarSubmenuTemplate = $('#navbar_submenu_template').children()[0];
+      var thisNavbarItem, thisNavbarSubmenu;
+      
+      for (var i=0; i<categoriesData.length; i++) {
+
+        if (0 === categoriesData[i].children.length) {
+
+          thisNavbarItem = $(navbarItemTemplate).clone(); 
+
+          $(thisNavbarItem).html(categoriesData[i].title);
+
+          $(thisNavbarItem).data('category-id', categoriesData[i].id);
+
+          $('#collapsingNavbar .dropdown-menu:not(.submenu-dropdown)').append(thisNavbarItem);
+
+        } else {
+
+          //
+          //
+          // Currently support level 2 sub-menu only
+          //
+          // Level 2 sub-menu
+          //
+          //
+          thisNavbarSubmenu = $(navbarSubmenuTemplate).clone();
+
+          $(thisNavbarSubmenu).find('.dropdown-main-item').attr('id', 'bizsys_dropdownMenu_'+categoriesData[i].title);
+          $(thisNavbarSubmenu).find('.dropdown-main-item').html(categoriesData[i].title);
+          $(thisNavbarSubmenu).find('.dropdown-menu').attr('aria-labelledby', 'bizsys_dropdownMenu_'+categoriesData[i].title);
+
+          for (var j=0; j<categoriesData[i].children.length; j++) {
+
+              thisNavbarItem = $(navbarItemTemplate).clone(); 
+
+              $(thisNavbarItem).html(categoriesData[i].children[j].title);
+
+              $(thisNavbarItem).data('category-id', categoriesData[i].children[j].id);
+
+              $(thisNavbarSubmenu).find('.dropdown-menu').append(thisNavbarItem);
+
+          }
+
+          $('#collapsingNavbar .dropdown-menu').append(thisNavbarSubmenu);
+
+        }
+
+      }
+
+      bindNavBarAllItemsOnClick();
+      bindNavBarSubmenuItems();
+      bindNavbarCategoriesOnClick();
+
+    }
+
     function bindProductLinksOnClick() {
       $('.product-link').on('click', function(event){
         showProduct($(this).data('product-id'));
@@ -796,7 +872,7 @@
 
     function bindNavbarCategoriesOnClick() {
       $('.category-item').on('click', function(event){
-        showCategory($(this).data('category-name'));
+        showCategory($(this).data('category-id'));
       });
     }
 
@@ -815,36 +891,80 @@
 
     function getFeaturedProductsData(fileName, successFunc) {
 
-      $.getJSON(fileName, function(data){
-        
-        //catelogData is declared globally
-        featuredProductsData = data;
+      if (staticMode) {
 
-        window[successFunc]();
+        $.getJSON(fileName, function(data){
+          
+          //catelogData is declared globally
+          featuredProductsData = data;
 
-      });
+          window[successFunc]();
+
+        });
+
+      } else {
+
+        //load data from frontend server
+        $.get(dataEndpoint, {action: 'featured'}, function(data){
+
+          featuredProductsData = JSON.parse(data);
+
+          window[successFunc]();
+
+        });
+
+      }
       
     }
 
     function getProductsData(fileName, successFunc) {
       
-      $.getJSON(fileName, function(data){
-        
-        //productsData is declared globally
-        productsData = data;
+      if (staticMode) {
 
-        window[successFunc]();
+        $.getJSON(fileName, function(data){
+          
+          //productsData was declared globally
+          productsData = data;
 
-      });
+          window[successFunc]();
+
+        });
+
+      } else {
+
+        //load data from frontend server
+        $.get(dataEndpoint, {action: 'products'}, function(data){
+
+          productsData = JSON.parse(data);
+
+          window[successFunc]();
+
+        });
+
+      }
 
     }
 
-    function getCatalogData(fileName) {
+    function getCategoriesData(fileName, successFuncName) {
 
       $.getJSON(fileName, function(data){
         
-        //catelogData is declared globally
+        //categoriesData was declared globally
+        categoriesData = data;
+
+        window[successFuncName]();
+
+      });
+      
+    }
+
+    function getCatalogData(fileName, success) {
+
+      $.getJSON(fileName, function(data){
+        
+        //catelogData was declared globally
         catalogData = data;
+        success();
 
       });
       
@@ -867,12 +987,12 @@
 
     }
 
-    function getCategoryByName(categoryName) {
+    function getCategoryByID(categoryID) {
 
       //productsData is declared globally
       for (var i=0; i<catalogData.length; i++) {
 
-        if (categoryName === catalogData[i].categoryName) {
+        if (categoryID === catalogData[i].categoryID) {
 
           return catalogData[i];
 
@@ -883,6 +1003,23 @@
       return null;
 
     }
+
+    // function getCategoryByName(categoryName) {
+
+    //   //productsData is declared globally
+    //   for (var i=0; i<catalogData.length; i++) {
+
+    //     if (categoryName === catalogData[i].categoryName) {
+
+    //       return catalogData[i];
+
+    //     }
+
+    //   }
+
+    //   return null;
+
+    // }
 
     function hideCollapsibleNavBar() {
       if ('none' !== $('#navbar_toggler').css('display')) {
@@ -1203,19 +1340,23 @@
       });
     }
 
-    
-
-    $(document).ready(function(){
-
-      getProductsData('products.json', 'getAndShowFeaturedProducts');
-      getCatalogData('catalog.json');
-
+    function bindNavBarSubmenuItems() {
       //For nested menu
       $('.dropdown-submenu a.dropdown-main-item').on("click", function(e){
         $(this).next('div').toggle();
         e.stopPropagation();
         e.preventDefault();
       });
+    }
+
+    $(document).ready(function(){
+
+      getProductsData('products.json', 'getAndShowFeaturedProducts');
+      getCatalogData('catalog.json', function(){
+        getCategoriesData('categories.json', 'insertCategoriesDataToMainNavBar');
+      });
+
+      bindNavBarSubmenuItems();
 
       enableSmoothScrolling();
 
@@ -1268,6 +1409,7 @@
                 Categories
               </a>
               <div class="dropdown-menu" aria-labelledby="Preview">
+                <!--
                 <a class="dropdown-item category-item" data-category-name="architecture">Architecture</a>
                 <div class="dropdown-submenu">
                   <a class="dropdown-main-item dropdown-toggle dropdown-item" id="dropdownMenu2" href="#">Nature</a>
@@ -1275,8 +1417,6 @@
                     <a class="dropdown-item category-item" data-category-name="forest">Forest</a>
                     <a class="dropdown-item category-item" data-category-name="landscape">Landscape</a>
                     <a class="dropdown-item category-item" data-category-name="night">Night</a>
-                    <!-- Level 3 dropdown menu
-
                     <div class="dropdown-submenu">
                       <a class="dropdown-main-item dropdown-toggle dropdown-item" id="dropdownMenu3" href="#">Nature</a>
                       <div class="dropdown-menu" aria-labelledby="dropdownMenu3">
@@ -1286,11 +1426,11 @@
                       </div>
                     </div>
 
-                    -->
                   </div>
                 </div>
                 <a class="dropdown-item category-item" data-category-name="portrait">Portrait</a>
                 <a class="dropdown-item category-item" data-category-name="sport">Sport</a>
+              -->
               </div>
             </li>
             <li class="nav-item">
@@ -1315,6 +1455,20 @@
         </div>
       </div>  
     </nav>
+
+    <!-- templates [START] -->
+    <div id="navbar_item_template" class="displayNone">
+      <a class="dropdown-item category-item"></a>
+    </div>
+
+    <div id="navbar_submenu_template" class="displayNone">
+      <div class="dropdown-submenu">
+        <a class="dropdown-main-item dropdown-toggle dropdown-item" href="#">Nature</a>
+        <div class="dropdown-menu submenu-dropdown">
+        </div>
+      </div>
+    </div>
+    <!-- templates [END] -->
 
   </div>
   
