@@ -211,6 +211,13 @@
       #mainCarousel p {
         font-size: 0.5rem;
       }
+      #shopping_cart_table {
+        font-size: 0.5rem;
+      }
+      .shopping-cart-product-thumbnail {
+        width: 32px;
+        height: 32px;
+      }
     }
     /* Small */
     @media(min-width:544px) and (max-width:767px) {
@@ -301,7 +308,7 @@
     var categoriesData;
     var catalogData;
     var shoppingCartData = [];
-    var staticMode = true;
+    var staticMode = false;
     var dataEndpoint = 'https://betterworld.company/lab/storefront/api/data.php';
 
     function scrollTo(hash) {
@@ -359,6 +366,10 @@
 
     }
 
+    function generateProductImageUrl(productID) {
+      return dataEndpoint + '?action=image&object_type_name=product&id='+productID+'&key=Product+Image';
+    }
+
     function displayFeaturedProducts(products) {
 
       var cardTemplate = $($('#featured_card_template').children()[0]);
@@ -376,7 +387,8 @@
         if (undefined !== products[i].imageUrl) {
           $(thisCard).find('.productThumbnail').css('background-image', 'url("'+products[i].imageUrl+'")');
         } else {
-          $(thisCard).find('.productThumbnail').css('background-image', 'url("productImages/sport3.jpg")');
+          $(thisCard).find('.productThumbnail').css('background-image', 'url("'+generateProductImageUrl(products[i].id)+'")');
+          //$(thisCard).find('.productThumbnail').css('background-image', 'url("productImages/sport3.jpg")');
         }
         $(thisCard).find('.product-link').data('product-id', products[i].id);
         $(thisCard).find('.product-buy').data('product-id', products[i].id);
@@ -407,8 +419,36 @@
       scrollTo('#catalog');
 
       //var cd = getCategoryByName(categoryName);
-      var cd = getCategoryByID(categoryID);
-      displayCategory(cd);
+
+      if (staticMode) {
+
+        var cd = getCategoryByID(categoryID);
+        displayCategory(cd);
+
+      } else {
+
+        var cd = getCategoryByID(categoryID);
+
+        if (cd !== null) {
+
+          displayCategory(cd);
+
+        } else {
+
+          $.get(dataEndpoint, {action: 'catalog', id: categoryID}, function(categoryProductIDsArray){
+            
+            catalogData.push({categoryID: categoryID, ids: JSON.parse(categoryProductIDsArray)});
+
+            var cd = getCategoryByID(categoryID);
+            displayCategory(cd);
+
+          });
+
+        }
+
+      }
+
+      
     }
 
     function displayCategory(categoryData) {
@@ -451,7 +491,8 @@
           if (undefined !== products[i].imageUrl) {
             $(thisCard).find('.productThumbnail').css('background-image', 'url("'+products[i].imageUrl+'")');
           } else {
-            $(thisCard).find('.productThumbnail').css('background-image', 'url("productImages/sport3.jpg")');
+            $(thisCard).find('.productThumbnail').css('background-image', 'url("'+generateProductImageUrl(products[i].id)+'")');
+            // $(thisCard).find('.productThumbnail').css('background-image', 'url("productImages/sport3.jpg")');
           }
           $(thisCard).find('.product-link').data('product-id', products[i].id);
           $(thisCard).find('.product-buy').data('product-id', products[i].id);
@@ -705,7 +746,8 @@
           if (undefined !== products[i].imageUrl) {
             $(thisTableRow).find('.shopping-cart-product-thumbnail').css('background-image', 'url("'+products[i].imageUrl+'")');
           } else {
-            $(thisTableRow).find('.shopping-cart-product-thumbnail').css('background-image', 'url("productImages/sport3.jpg")');
+            $(thisTableRow).find('.shopping-cart-product-thumbnail').css('background-image', 'url("'+generateProductImageUrl(products[i].id)+'")');
+            // $(thisTableRow).find('.shopping-cart-product-thumbnail').css('background-image', 'url("productImages/sport3.jpg")');
           }
 
           $(thisTableRow).find('.shopping-cart-product-name').html(products[i].title);
@@ -794,7 +836,12 @@
       $('#product_details_title').text(productData.title);
       $('#product_details_description').text(productData.description);
       $('#product_details_price').text('$' + productData.price);
-      $('#productImage').css('background-image', 'url("'+productData.imageUrl+'")');
+      if (undefined != productData.imageUrl) {
+        $('#productImage').css('background-image', 'url("'+productData.imageUrl+'")');
+      } else {
+        $('#productImage').css('background-image', 'url("'+generateProductImageUrl(productData.id)+'")');
+      }
+
     }
 
     function bindProductDetailsBuyLink() {
@@ -917,7 +964,7 @@
       
     }
 
-    function getProductsData(fileName, successFunc) {
+    function getProductsData(fileName, successFuncName) {
       
       if (staticMode) {
 
@@ -926,7 +973,7 @@
           //productsData was declared globally
           productsData = data;
 
-          window[successFunc]();
+          window[successFuncName]();
 
         });
 
@@ -937,7 +984,7 @@
 
           productsData = JSON.parse(data);
 
-          window[successFunc]();
+          window[successFuncName]();
 
         });
 
@@ -947,26 +994,50 @@
 
     function getCategoriesData(fileName, successFuncName) {
 
-      $.getJSON(fileName, function(data){
-        
-        //categoriesData was declared globally
-        categoriesData = data;
+      if (staticMode) {
 
-        window[successFuncName]();
+        $.getJSON(fileName, function(data){
+          
+          //categoriesData was declared globally
+          categoriesData = data;
 
-      });
+          window[successFuncName]();
+
+        });
       
+      } else {
+
+        //load data from frontend server
+        $.get(dataEndpoint, {action: 'categories'}, function(data){
+
+          categoriesData = JSON.parse(data);
+
+          window[successFuncName]();
+
+        });
+        
+      }
+
     }
 
     function getCatalogData(fileName, success) {
 
-      $.getJSON(fileName, function(data){
-        
-        //catelogData was declared globally
-        catalogData = data;
+      if (staticMode) {
+
+        $.getJSON(fileName, function(data){
+          
+          //catelogData was declared globally
+          catalogData = data;
+          success();
+
+        });
+
+      } else {
+
+        catalogData = [];
         success();
 
-      });
+      }
       
     }
 
