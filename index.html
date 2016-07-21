@@ -308,7 +308,7 @@
     var categoriesData;
     var catalogData;
     var shoppingCartData = [];
-    var staticMode = false;
+    var staticMode = true;
     var dataEndpoint = 'https://betterworld.company/lab/storefront/api/data.php';
 
     function scrollTo(hash) {
@@ -1370,7 +1370,9 @@
     }
 
     function bindCheckoutPaymentConfirmButton() {
+      console.log('bind');
       $('#checkout_payment_confirm_button').on('click', function(){
+        console.log('click');
         $('#checkout_payment_confirm_button').fadeOut(function(){
           $('#checkout_payment_confirm_button').fadeIn();
         });
@@ -1392,7 +1394,7 @@
       // });
     }
 
-    function bindCheckoutPaymentConfirmButton() {
+    function bindCheckoutExistingAccountCheckbox() {
       $('#checkout_existing_account_checkbox').on('click', function(){
 
         if ($('#checkout_existing_account_checkbox').is(':checked')) {
@@ -1445,6 +1447,7 @@
       bindCheckoutPaymentBackButton();
       bindCheckoutBillingSameAsCheckbox();
       bindCheckoutPaymentConfirmButton();
+      bindCheckoutExistingAccountCheckbox();
 
       bindNavItemsToAvoidAnchorJumping();
 
